@@ -85,18 +85,28 @@ public class DCA_serviceImpl implements DCA_service {
 
 	@Override
 	public DCA_Doctor get_Doctor(String id) {
-			DCA_Doctor doctor=dca_repo.findById(id).get();
-			List<DCA_Patient> plst = new ArrayList<>();
+		DCA_Doctor doctor = dca_repo.findById(id).get();
+		List<DCA_Patient> plst = new ArrayList<>();
+		try {
+			String[] apptLst = restTemplate.getForObject("http://localhost:8082/appointments/doctor/" + id,
+					String[].class);
+			if (apptLst == null || apptLst.length == 0) {
+				System.out.println("No appointments found for Doctor ID: " + id);
+			} else {
+				Arrays.asList(apptLst).stream().forEach(pId -> {
+					DCA_Patient patient = restTemplate
+							.getForObject("http://localhost:8089/patient/doc/" + pId, DCA_Patient.class);
+					plst.add(patient);
+					doctor.setPatients(plst);
+				});
+			}
+		} catch (Exception e) {
+			System.err.println("No data found");
+		}
 
-			DCA_Appointment[] apptLst=restTemplate.getForObject("http://localhost:8082/appointments/doctor/" + id, DCA_Appointment[].class);
-			
-			Arrays.asList(apptLst).stream().forEach(appt->{
-				DCA_Patient patient=restTemplate.getForObject("http://localhost:8089/patient/"+appt.getPatient_id(),DCA_Patient.class);
-			plst.add(patient);			
-			});
-			doctor.setPatients(plst);
 		return doctor;
 	}
+
 
 	@Override
 	public List<DCA_Doctor> getAllDoctor() {

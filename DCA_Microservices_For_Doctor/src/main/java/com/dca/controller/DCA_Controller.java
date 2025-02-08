@@ -45,6 +45,7 @@ public class DCA_Controller {
 		return ResponseEntity.status(HttpStatus.CREATED).body(dca_service.create_Doctor(doctor));
 	}
 	
+	@CrossOrigin(origins="http://localhost:3000")
 	@GetMapping("/{doctorId}")
 	public ResponseEntity<DCA_Doctor> getDoctor(@PathVariable String doctorId) {
 		

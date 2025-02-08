@@ -64,6 +64,13 @@ public class PatientController {
 
 	}
 
+	@CrossOrigin(origins="http://localhost:3000")
+	@GetMapping("/doc/{patientId}")
+	public ResponseEntity<DCA_Patient> getPatientForDoctor(@PathVariable String patientId) {
+		return ResponseEntity.status(HttpStatus.OK).body(patientService.getPatientForDoctor(patientId));
+	}
+	
+	
 //	@GetMapping("/doctor/{doctor_id}")
 //	public ResponseEntity<List<DCA_Patient>> getPatientByDoctorId(@PathVariable String doctor_id){
 //		List<DCA_Patient> patientList=patientService.getPatientByDoctorId(doctor_id);

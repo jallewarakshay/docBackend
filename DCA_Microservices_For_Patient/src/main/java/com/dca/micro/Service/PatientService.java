@@ -12,6 +12,8 @@ public interface PatientService {
 	DCA_Patient getPatient(String id);
 	void deletePatient(String id);
 	void bookAppointment(String patientId, String doctorId);
+	DCA_Patient getPatientForDoctor(String patientId);
+
 //	List<DCA_Patient> getPatientByDoctorId(String DocId);
 //	List<DCA_Patient> getPatientByReceptionistId(String receptionistId);
 //	List<DCA_Patient> getPatientByUserId(String userId);

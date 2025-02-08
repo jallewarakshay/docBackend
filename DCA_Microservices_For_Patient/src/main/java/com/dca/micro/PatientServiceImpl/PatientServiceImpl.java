@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.dca.micro.Repository.PatientRepository;
@@ -78,17 +79,26 @@ public class PatientServiceImpl implements PatientService {
 
 		DCA_Patient patient = patientRepository.findById(id).get();
 
-		DCA_Appointment[] apptsLst = restTemplate.getForObject("http://localhost:8082/appointments/patient/" + id,
-				DCA_Appointment[].class);
-		List<DCA_Doctor> dlst = new ArrayList<>();
+		try {
+			String[] apptsLst = restTemplate.getForObject("http://localhost:8082/appointments/patient/" + id,
+					String[].class);
+			if (apptsLst == null || apptsLst.length == 0) {
+				System.out.println("No appointments found for patient ID: " + id);
+			} else {
+				List<DCA_Doctor> dlst = new ArrayList<>();
 
-		Arrays.asList(apptsLst).stream().forEach(appt -> {
-			DCA_Doctor doctor = restTemplate.getForObject("http://localhost:8081/doctor/" + appt.getDoctorId(),
-					DCA_Doctor.class);
-			dlst.add(doctor);
-		});
+				Arrays.asList(apptsLst).stream().forEach(dId -> {
+					DCA_Doctor doctor = restTemplate.getForObject("http://localhost:8081/doctor/" + dId,
+							DCA_Doctor.class);
+					dlst.add(doctor);
+				});
 
-		patient.setDoctors(dlst);
+				patient.setDoctors(dlst);
+			}
+		} catch (RestClientException e) {
+			System.out.println("Patient with ID " + id + " not found.");
+		}
+
 		return patient;
 	}
 
@@ -105,6 +115,13 @@ public class PatientServiceImpl implements PatientService {
 		appt.setPatientId(patientId);
 		restTemplate.postForObject("http://localhost:8082/appointments", appt, DCA_Appointment.class);
 
+	}
+
+	@Override
+	public DCA_Patient getPatientForDoctor(String patientId) {
+
+		DCA_Patient patient = patientRepository.findById(patientId).get();
+		return patient;
 	}
 
 //	@Override
